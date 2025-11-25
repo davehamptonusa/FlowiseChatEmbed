@@ -6,6 +6,7 @@ type Props = {
   botContainer: HTMLDivElement | undefined;
   poweredByTextColor?: string;
   badgeBackgroundColor?: string;
+  textLinkTarget?: '_self' | '_blank';
 };
 
 const defaultTextColor = '#303235';
@@ -52,7 +53,7 @@ export const Badge = (props: Props) => {
           <a
             ref={liteBadge}
             href={props.footer?.companyLink ?? 'https://flowiseai.com'}
-            target="_blank"
+            target={props.textLinkTarget ?? '_blank'}
             rel="noopener noreferrer"
             class="lite-badge"
             id="lite-badge"
