@@ -56,6 +56,12 @@ export type FeedbackTheme = {
   color?: string;
 };
 
+export type AdConfig = {
+  showAd?: boolean;
+  dataAdClient?: string;
+  dataAdSlot?: string;
+};
+
 export type ChatWindowTheme = {
   showTitle?: boolean;
   showAgentMessages?: boolean; // parameter to show agent reasonings when using agentflows
@@ -83,6 +89,7 @@ export type ChatWindowTheme = {
   dateTimeToggle?: DateTimeToggleTheme;
   renderHTML?: boolean;
   textLinkTarget?: '_self' | '_blank';
+  adConfig?: AdConfig;
 };
 
 export type ButtonTheme = {

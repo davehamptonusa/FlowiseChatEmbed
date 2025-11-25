@@ -1,5 +1,6 @@
 import { createSignal, createEffect, For, onMount, Show, mergeProps, on, createMemo, onCleanup } from 'solid-js';
 import { v4 as uuidv4 } from 'uuid';
+import { AdConfig } from '@/features/bubble/types';
 import {
   sendMessageQuery,
   upsertVectorStoreWithFormData,
@@ -174,6 +175,7 @@ export type BotProps = {
   dateTimeToggle?: DateTimeToggleTheme;
   renderHTML?: boolean;
   textLinkTarget?: '_self' | '_blank';
+  adConfig?: AdConfig;
   closeBot?: () => void;
 };
 
@@ -1318,28 +1320,28 @@ export const Bot = (botProps: BotProps & { class?: string }) => {
       const loadedMessages: MessageType[] =
         chatMessage?.chatHistory?.length > 0
           ? chatMessage.chatHistory?.map((message: MessageType) => {
-              const chatHistory: MessageType = {
-                messageId: message?.messageId,
-                message: message.message,
-                type: message.type,
-                rating: message.rating,
-                dateTime: message.dateTime,
-              };
-              if (message.sourceDocuments) chatHistory.sourceDocuments = message.sourceDocuments;
-              if (message.fileAnnotations) chatHistory.fileAnnotations = message.fileAnnotations;
-              if (message.fileUploads) chatHistory.fileUploads = message.fileUploads;
-              if (message.agentReasoning) chatHistory.agentReasoning = message.agentReasoning;
-              if (message.action) chatHistory.action = message.action;
-              if (message.artifacts) chatHistory.artifacts = message.artifacts;
-              if (message.followUpPrompts) chatHistory.followUpPrompts = message.followUpPrompts;
-              if (message.execution && message.execution.executionData)
-                chatHistory.agentFlowExecutedData =
-                  typeof message.execution.executionData === 'string' ? JSON.parse(message.execution.executionData) : message.execution.executionData;
-              if (message.agentFlowExecutedData)
-                chatHistory.agentFlowExecutedData =
-                  typeof message.agentFlowExecutedData === 'string' ? JSON.parse(message.agentFlowExecutedData) : message.agentFlowExecutedData;
-              return chatHistory;
-            })
+            const chatHistory: MessageType = {
+              messageId: message?.messageId,
+              message: message.message,
+              type: message.type,
+              rating: message.rating,
+              dateTime: message.dateTime,
+            };
+            if (message.sourceDocuments) chatHistory.sourceDocuments = message.sourceDocuments;
+            if (message.fileAnnotations) chatHistory.fileAnnotations = message.fileAnnotations;
+            if (message.fileUploads) chatHistory.fileUploads = message.fileUploads;
+            if (message.agentReasoning) chatHistory.agentReasoning = message.agentReasoning;
+            if (message.action) chatHistory.action = message.action;
+            if (message.artifacts) chatHistory.artifacts = message.artifacts;
+            if (message.followUpPrompts) chatHistory.followUpPrompts = message.followUpPrompts;
+            if (message.execution && message.execution.executionData)
+              chatHistory.agentFlowExecutedData =
+                typeof message.execution.executionData === 'string' ? JSON.parse(message.execution.executionData) : message.execution.executionData;
+            if (message.agentFlowExecutedData)
+              chatHistory.agentFlowExecutedData =
+                typeof message.agentFlowExecutedData === 'string' ? JSON.parse(message.agentFlowExecutedData) : message.agentFlowExecutedData;
+            return chatHistory;
+          })
           : [{ message: props.welcomeMessage ?? defaultWelcomeMessage, type: 'apiMessage' }];
 
       const filteredMessages = loadedMessages.filter((message) => message.type !== 'leadCaptureMessage');
@@ -2394,33 +2396,70 @@ export const Bot = (botProps: BotProps & { class?: string }) => {
 
           {props.showTitle ? (
             <div
-              class="flex flex-row items-center w-full h-[50px] absolute top-0 left-0 z-10"
+              class="flex flex-col w-full absolute top-0 left-0 z-10"
               style={{
-                background: props.titleBackgroundColor || props.bubbleBackgroundColor || defaultTitleBackgroundColor,
-                color: props.titleTextColor || props.bubbleTextColor || defaultBackgroundColor,
                 'border-top-left-radius': props.isFullPage ? '0px' : '6px',
                 'border-top-right-radius': props.isFullPage ? '0px' : '6px',
+                overflow: 'hidden',
               }}
             >
-              <Show when={props.titleAvatarSrc}>
+              {props.adConfig?.showAd && (
                 <>
-                  <div style={{ width: '15px' }} />
-                  <Avatar initialAvatarSrc={props.titleAvatarSrc} />
+                  <style>
+                    {`
+                      button[title="Close Chat"] {
+                        top: 50px !important;
+                      }
+                    `}
+                  </style>
+                  <div
+                    class="w-full h-[50px] flex justify-center items-center"
+                    style={{
+                      background: props.titleBackgroundColor || props.bubbleBackgroundColor || defaultTitleBackgroundColor,
+                    }}
+                  >
+                    <script
+                      async
+                      src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${props.adConfig.dataAdClient}`}
+                      crossorigin="anonymous"
+                    />
+                    <ins
+                      class="adsbygoogle"
+                      style={{ display: 'inline-block', width: '320px', height: '50px' }}
+                      data-ad-client={props.adConfig.dataAdClient}
+                      data-ad-slot={props.adConfig.dataAdSlot}
+                    />
+                    <script>(adsbygoogle = window.adsbygoogle || []).push({ });</script>
+                  </div>
                 </>
-              </Show>
-              <Show when={props.title}>
-                <span class="px-3 whitespace-pre-wrap font-semibold max-w-full">{props.title}</span>
-              </Show>
-              <div style={{ flex: 1 }} />
-              <DeleteButton
-                sendButtonColor={props.bubbleTextColor}
-                type="button"
-                isDisabled={messages().length === 1}
-                class="my-2 ml-2"
-                on:click={clearChat}
+              )}
+              <div
+                class="flex flex-row items-center w-full h-[50px]"
+                style={{
+                  background: props.titleBackgroundColor || props.bubbleBackgroundColor || defaultTitleBackgroundColor,
+                  color: props.titleTextColor || props.bubbleTextColor || defaultBackgroundColor,
+                }}
               >
-                <span style={{ 'font-family': 'Poppins, sans-serif' }}>Clear</span>
-              </DeleteButton>
+                <Show when={props.titleAvatarSrc}>
+                  <>
+                    <div style={{ width: '15px' }} />
+                    <Avatar initialAvatarSrc={props.titleAvatarSrc} />
+                  </>
+                </Show>
+                <Show when={props.title}>
+                  <span class="px-3 whitespace-pre-wrap font-semibold max-w-full">{props.title}</span>
+                </Show>
+                <div style={{ flex: 1 }} />
+                <DeleteButton
+                  sendButtonColor={props.bubbleTextColor}
+                  type="button"
+                  isDisabled={messages().length === 1}
+                  class="my-2 ml-2"
+                  on:click={clearChat}
+                >
+                  <span style={{ 'font-family': 'Poppins, sans-serif' }}>Clear</span>
+                </DeleteButton>
+              </div>
             </div>
           ) : null}
           <div class="flex flex-col w-full h-full justify-start z-0">

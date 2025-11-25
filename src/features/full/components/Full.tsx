@@ -94,6 +94,7 @@ export const Full = (props: FullProps, { element }: { element: HTMLElement }) =>
             dateTimeToggle={props.theme?.chatWindow?.dateTimeToggle}
             renderHTML={props.theme?.chatWindow?.renderHTML}
             textLinkTarget={props.theme?.chatWindow?.textLinkTarget}
+            adConfig={props.theme?.chatWindow?.adConfig}
           />
         </div>
       </Show>

@@ -157,6 +157,7 @@ export const Bubble = (props: BubbleProps) => {
               dateTimeToggle={bubbleProps.theme?.chatWindow?.dateTimeToggle}
               renderHTML={props.theme?.chatWindow?.renderHTML}
               textLinkTarget={bubbleProps.theme?.chatWindow?.textLinkTarget}
+              adConfig={bubbleProps.theme?.chatWindow?.adConfig}
               closeBot={closeBot}
             />
           </div>

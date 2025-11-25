@@ -171,6 +171,11 @@ You can also customize chatbot with different configuration
         sourceDocsTitle: 'Sources:',
         renderHTML: true,
         textLinkTarget: '_blank', //defaults to _blank - or set to _self to open in the same window
+        adConfig: { // shows ad at top of chat window
+          showAd: true,
+          dataAdClient: 'ca-pub-XXXXXXXXXXXXXXXX',
+          dataAdSlot: 'XXXXXXXXXX',
+        },
         botMessage: {
           backgroundColor: '#f7f8ff',
           textColor: '#303235',
