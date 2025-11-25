@@ -39,6 +39,7 @@ type Props = {
   isTTSPlaying?: Record<string, boolean>;
   handleTTSClick?: (messageId: string, messageText: string) => void;
   handleTTSStop?: (messageId: string) => void;
+  textLinkTarget?: '_self' | '_blank';
 };
 
 const defaultBackgroundColor = '#f7f8ff';
@@ -85,9 +86,9 @@ export const BotBubble = (props: Props) => {
         (element as HTMLElement).style.color = '#4CAF50'; // Green color
       });
 
-      // Set target="_blank" for links
+      // Set target for links
       el.querySelectorAll('a').forEach((link) => {
-        link.target = '_blank';
+        link.target = props.textLinkTarget ?? '_blank';
       });
 
       // Store the element ref for the copy function
@@ -308,7 +309,7 @@ export const BotBubble = (props: Props) => {
         });
 
         el.querySelectorAll('a').forEach((link) => {
-          link.target = '_blank';
+          link.target = props.textLinkTarget ?? '_blank';
         });
       }
     };
@@ -323,8 +324,8 @@ export const BotBubble = (props: Props) => {
                 const isFileStorage = typeof item.data === 'string' && item.data.startsWith('FILE-STORAGE::');
                 return isFileStorage
                   ? `${props.apiHost}/api/v1/get-upload-file?chatflowId=${props.chatflowid}&chatId=${props.chatId}&fileName=${(
-                      item.data as string
-                    ).replace('FILE-STORAGE::', '')}`
+                    item.data as string
+                  ).replace('FILE-STORAGE::', '')}`
                   : (item.data as string);
               })()}
             />

@@ -82,6 +82,7 @@ export type ChatWindowTheme = {
   clearChatOnReload?: boolean;
   dateTimeToggle?: DateTimeToggleTheme;
   renderHTML?: boolean;
+  textLinkTarget?: '_self' | '_blank';
 };
 
 export type ButtonTheme = {

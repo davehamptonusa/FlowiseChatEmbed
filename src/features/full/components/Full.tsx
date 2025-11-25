@@ -93,6 +93,7 @@ export const Full = (props: FullProps, { element }: { element: HTMLElement }) =>
             disclaimer={props.theme?.disclaimer}
             dateTimeToggle={props.theme?.chatWindow?.dateTimeToggle}
             renderHTML={props.theme?.chatWindow?.renderHTML}
+            textLinkTarget={props.theme?.chatWindow?.textLinkTarget}
           />
         </div>
       </Show>
