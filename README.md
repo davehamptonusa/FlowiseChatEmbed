@@ -170,6 +170,7 @@ You can also customize chatbot with different configuration
         clearChatOnReload: false, // If set to true, the chat will be cleared when the page reloads
         sourceDocsTitle: 'Sources:',
         renderHTML: true,
+        textLinkTarget: '_blank', //defaults to _blank - or set to _self to open in the same window
         botMessage: {
           backgroundColor: '#f7f8ff',
           textColor: '#303235',
