@@ -177,6 +177,7 @@ export type BotProps = {
   textLinkTarget?: '_self' | '_blank';
   adConfig?: AdConfig;
   closeBot?: () => void;
+  onBotOpened?: () => void;
 };
 
 export type LeadsConfig = {
@@ -463,6 +464,7 @@ export const Bot = (botProps: BotProps & { class?: string }) => {
   let chatContainer: HTMLDivElement | undefined;
   let bottomSpacer: HTMLDivElement | undefined;
   let botContainer: HTMLDivElement | undefined;
+  let adContainer: HTMLDivElement | undefined;
 
   const [userInput, setUserInput] = createSignal('');
   const [loading, setLoading] = createSignal(false);
@@ -569,6 +571,18 @@ export const Bot = (botProps: BotProps & { class?: string }) => {
     setTimeout(() => {
       chatContainer?.scrollTo(0, chatContainer.scrollHeight);
     }, 50);
+
+    // Refresh ad when bot opens
+    if (props.adConfig?.showAd) {
+      setTimeout(() => {
+        refreshAd();
+      }, 100);
+    }
+
+    // Call onBotOpened callback if provided
+    if (props.onBotOpened) {
+      props.onBotOpened();
+    }
   });
 
   const scrollToBottom = () => {
@@ -1047,6 +1061,11 @@ export const Bot = (botProps: BotProps & { class?: string }) => {
         .join('\n');
     }
 
+    // Refresh ad when sending a message
+    if (props.adConfig?.showAd) {
+      refreshAd();
+    }
+
     setLoading(true);
     scrollToBottom();
 
@@ -1320,28 +1339,28 @@ export const Bot = (botProps: BotProps & { class?: string }) => {
       const loadedMessages: MessageType[] =
         chatMessage?.chatHistory?.length > 0
           ? chatMessage.chatHistory?.map((message: MessageType) => {
-              const chatHistory: MessageType = {
-                messageId: message?.messageId,
-                message: message.message,
-                type: message.type,
-                rating: message.rating,
-                dateTime: message.dateTime,
-              };
-              if (message.sourceDocuments) chatHistory.sourceDocuments = message.sourceDocuments;
-              if (message.fileAnnotations) chatHistory.fileAnnotations = message.fileAnnotations;
-              if (message.fileUploads) chatHistory.fileUploads = message.fileUploads;
-              if (message.agentReasoning) chatHistory.agentReasoning = message.agentReasoning;
-              if (message.action) chatHistory.action = message.action;
-              if (message.artifacts) chatHistory.artifacts = message.artifacts;
-              if (message.followUpPrompts) chatHistory.followUpPrompts = message.followUpPrompts;
-              if (message.execution && message.execution.executionData)
-                chatHistory.agentFlowExecutedData =
-                  typeof message.execution.executionData === 'string' ? JSON.parse(message.execution.executionData) : message.execution.executionData;
-              if (message.agentFlowExecutedData)
-                chatHistory.agentFlowExecutedData =
-                  typeof message.agentFlowExecutedData === 'string' ? JSON.parse(message.agentFlowExecutedData) : message.agentFlowExecutedData;
-              return chatHistory;
-            })
+            const chatHistory: MessageType = {
+              messageId: message?.messageId,
+              message: message.message,
+              type: message.type,
+              rating: message.rating,
+              dateTime: message.dateTime,
+            };
+            if (message.sourceDocuments) chatHistory.sourceDocuments = message.sourceDocuments;
+            if (message.fileAnnotations) chatHistory.fileAnnotations = message.fileAnnotations;
+            if (message.fileUploads) chatHistory.fileUploads = message.fileUploads;
+            if (message.agentReasoning) chatHistory.agentReasoning = message.agentReasoning;
+            if (message.action) chatHistory.action = message.action;
+            if (message.artifacts) chatHistory.artifacts = message.artifacts;
+            if (message.followUpPrompts) chatHistory.followUpPrompts = message.followUpPrompts;
+            if (message.execution && message.execution.executionData)
+              chatHistory.agentFlowExecutedData =
+                typeof message.execution.executionData === 'string' ? JSON.parse(message.execution.executionData) : message.execution.executionData;
+            if (message.agentFlowExecutedData)
+              chatHistory.agentFlowExecutedData =
+                typeof message.agentFlowExecutedData === 'string' ? JSON.parse(message.agentFlowExecutedData) : message.agentFlowExecutedData;
+            return chatHistory;
+          })
           : [{ message: props.welcomeMessage ?? defaultWelcomeMessage, type: 'apiMessage' }];
 
       const filteredMessages = loadedMessages.filter((message) => message.type !== 'leadCaptureMessage');
@@ -2296,6 +2315,38 @@ export const Bot = (botProps: BotProps & { class?: string }) => {
     cleanupTTSForMessage(messageId);
   };
 
+  // Function to refresh Google AdSense ad
+  const refreshAd = () => {
+    if (!adContainer) return;
+
+    try {
+      // Remove existing ad elements
+      const existingAds = adContainer.querySelectorAll('.adsbygoogle');
+      existingAds.forEach((ad) => ad.remove());
+
+      // Create new ad element
+      const newAd = document.createElement('ins');
+      newAd.className = 'adsbygoogle';
+      newAd.style.display = 'inline-block';
+      newAd.style.width = '320px';
+      newAd.style.height = '50px';
+      newAd.setAttribute('data-ad-client', props.adConfig?.dataAdClient || '');
+      newAd.setAttribute('data-ad-slot', props.adConfig?.dataAdSlot || '');
+
+      // Append new ad to container
+      adContainer.appendChild(newAd);
+
+      // Push ad to Google AdSense
+      try {
+        ((window as any).adsbygoogle = (window as any).adsbygoogle || []).push({});
+      } catch (e) {
+        console.error('Error pushing ad:', e);
+      }
+    } catch (error) {
+      console.error('Error refreshing ad:', error);
+    }
+  };
+
   createEffect(
     // listen for changes in previews
     on(previews, (uploads) => {
@@ -2413,6 +2464,7 @@ export const Bot = (botProps: BotProps & { class?: string }) => {
                     `}
                   </style>
                   <div
+                    ref={adContainer}
                     class="w-full h-[50px] flex justify-center items-center"
                     style={{
                       background: props.titleBackgroundColor || props.bubbleBackgroundColor || defaultTitleBackgroundColor,
@@ -2429,7 +2481,7 @@ export const Bot = (botProps: BotProps & { class?: string }) => {
                       data-ad-client={props.adConfig.dataAdClient}
                       data-ad-slot={props.adConfig.dataAdSlot}
                     />
-                    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+                    <script>(adsbygoogle = window.adsbygoogle || []).push({ });</script>
                   </div>
                 </>
               )}

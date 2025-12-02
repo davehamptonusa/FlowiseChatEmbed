@@ -159,6 +159,10 @@ export const Bubble = (props: BubbleProps) => {
               textLinkTarget={bubbleProps.theme?.chatWindow?.textLinkTarget}
               adConfig={bubbleProps.theme?.chatWindow?.adConfig}
               closeBot={closeBot}
+              onBotOpened={() => {
+                // This will be called when the Bot component mounts
+                // The ad refresh is handled inside the Bot component
+              }}
             />
           </div>
         </Show>
